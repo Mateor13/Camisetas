@@ -46,7 +46,7 @@ const ColorCamisetas = () => {
                 </div>
                 <form onSubmit={handleSubmit}>
                     <div className="mb-3">
-                    <label className="mb-2 block text-sm font-semibold">Seleccione una fecha para visualizar el color de la camiseta:</label>
+                    <label className="mb-2 block text-sm font-semibold">Seleccione una Fecha para Visualizar el Color de la Camiseta:</label>
                     <input
                         type="date"
                         className="block w-full rounded-md border border-gray-300 focus:border-purple-700 focus:outline-none focus:ring-1 focus:ring-purple-700 py-1 px-2 text-gray-500"
@@ -57,7 +57,7 @@ const ColorCamisetas = () => {
                     />
                     </div>
                     
-                    <button type="submit" className="py-2 w-full block text-center bg-gray-700/100 text-slate-300 border rounded-xl hover:scale-100 duration-300 hover:bg-gray-900 hover:text-white">Averiguar Camiseta</button>
+                    <button type="submit" className="py-2 w-full block text-center bg-gray-700/100 text-slate-300 border rounded-xl hover:scale-100 duration-300 hover:bg-gray-900 hover:text-white">Visualizar el Color de Camiseta</button>
                 </form>
             </div>
         </div>
