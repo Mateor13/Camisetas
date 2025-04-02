@@ -14,6 +14,19 @@ const ColorCamisetas = () => {
         setForm({ ...form, [e.target.name]: e.target.value });
     };
 
+    const fechaFormateada = (fecha) => {
+        if (!fecha) return "";
+        const [year, month, day] = fecha.split("-").map(Number);
+        const fechaLocal = new Date(year, month - 1, day);
+        const fechaFormateada = fechaLocal.toLocaleDateString("es-ES", {
+            weekday: "long",
+            day: "2-digit",
+            month: "long",
+            year: "numeric",
+        });
+        return fechaFormateada;
+    }
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
@@ -56,7 +69,10 @@ const ColorCamisetas = () => {
                         onChange={handleChange}
                     />
                     </div>
-                    
+                    <small className="text-center justify-center text-green-500 text-sm mb-2 block">
+                        {fechaFormateada(form.fecha)}
+                    </small>                    
+                    <small className="text-gray-500 text-sm mb-4">*Recuerda que la fecha no puede ser anterior a la actual.</small><br/><br/>
                     <button type="submit" className="py-2 w-full block text-center bg-gray-700/100 text-slate-300 border rounded-xl hover:scale-100 duration-300 hover:bg-gray-900 hover:text-white">Visualizar el Color de Camiseta</button>
                 </form>
             </div>

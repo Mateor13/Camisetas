@@ -4,7 +4,11 @@ import azul from "../../public/images/azul.webp";
 const Azul = () => {
     const navigate = useNavigate();
     const fecha = localStorage.getItem("fecha");
-    const fechaFormateada = new Date(fecha).toLocaleDateString("es-ES", {
+    
+    const [year, month, day] = fecha.split("-").map(Number);
+    const fechaLocal = new Date(year, month - 1, day);
+
+    const fechaFormateada = fechaLocal.toLocaleDateString("es-ES", {
         weekday: "long",
         day: "2-digit",
         month: "long",
