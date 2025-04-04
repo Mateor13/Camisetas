@@ -1,8 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useState } from "react";
-import { ToastContainer, toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
 import KFC from "../../../public/images/logo.png";
 import ARP from "../../../public/images/ARP.jpg";
 import Tropi from "../../../public/images/tropi.png";
@@ -22,18 +20,10 @@ const ColorCamisetas = () => {
         if (fecha < fechaActual) {
             mensaje.classList.remove("text-green-500");
             mensaje.classList.add("text-red-500");
-            const [year, month, day] = fecha.split("-").map(Number);
-            const fechaLocal = new Date(year, month - 1, day);
-            const fechaFormateada = fechaLocal.toLocaleDateString("es-ES", {
-                weekday: "long",
-                day: "2-digit",
-                month: "long",
-                year: "numeric",
-            });
-            return fechaFormateada;
+        }else{
+            mensaje.classList.remove("text-red-500");
+            mensaje.classList.add("text-green-500");
         }
-        mensaje.classList.remove("text-red-500");
-        mensaje.classList.add("text-green-500");
         const [year, month, day] = fecha.split("-").map(Number);
         const fechaLocal = new Date(year, month - 1, day);
         const fechaFormateada = fechaLocal.toLocaleDateString("es-ES", {
@@ -71,7 +61,6 @@ const ColorCamisetas = () => {
 
     return (
         <div className="w-full min-h-screen bg-red-700 flex flex-col justify-center items-center" >
-                <ToastContainer />
                 <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-lg">
                 <small className="text-black-700 text-center block my-4 text-3xl font-extrabold">Color de Camiseta</small>
                 <div className="flex justify-center items-center gap-4 mb-4">
