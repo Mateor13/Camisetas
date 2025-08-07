@@ -1,92 +1,265 @@
-import { Link, useNavigate } from "react-router-dom";
-import axios from "axios";
-import { useState } from "react";
-import KFC from "../../../public/images/logo.png";
-import ARP from "../../../public/images/ARP.jpg";
-import Tropi from "../../../public/images/tropi.png";
+import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import KFC from "../../images/logo.png";
+import ARP from "../../images/ARP.jpg";
+import Tropi from "../../images/tropi.png";
 
 const ColorCamisetas = () => {
     const [form, setForm] = useState({ fecha: "" });
+    const [mensaje, setMensaje] = useState("");
+    const [isError, setIsError] = useState(false);
+    const [isDark, setIsDark] = useState(false);
     const navigate = useNavigate();
 
+    // Hook para detectar el tema del navegador
+    useEffect(() => {
+        // Verificar preferencia inicial del sistema
+        const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+        setIsDark(mediaQuery.matches);
+
+        // Listener para cambios en el tema del sistema
+        const handleChange = (e) => {
+            setIsDark(e.matches);
+        };
+
+        mediaQuery.addEventListener('change', handleChange);
+
+        // Cleanup
+        return () => mediaQuery.removeEventListener('change', handleChange);
+    }, []);
+
     const handleChange = (e) => {
-        setForm({ ...form, [e.target.name]: e.target.value });
+        const nuevaFecha = e.target.value;
+        setForm({ ...form, [e.target.name]: nuevaFecha });
+        
+        if (nuevaFecha) {
+            const mensajeFormateado = fechaFormateada(nuevaFecha);
+            setMensaje(mensajeFormateado);
+            setIsError(mensajeFormateado.includes('anterior'));
+        } else {
+            setMensaje("");
+            setIsError(false);
+        }
     };
 
     const fechaFormateada = (fecha) => {
         if (!fecha) return "";
-        const mensaje = document.getElementById("mensaje");
-        const fechaActual = new Date().toISOString().split("T")[0];
-        if (fecha < fechaActual) {
-            mensaje.classList.remove("text-green-500");
-            mensaje.classList.add("text-red-500");
-        }else{
-            mensaje.classList.remove("text-red-500");
-            mensaje.classList.add("text-green-500");
-        }
-        const [year, month, day] = fecha.split("-").map(Number);
-        const fechaLocal = new Date(year, month - 1, day);
-        const fechaFormateada = fechaLocal.toLocaleDateString("es-ES", {
-            weekday: "long",
-            day: "2-digit",
-            month: "long",
-            year: "numeric",
-        });
-        return fechaFormateada;
-    }
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        try {
-            const url = `${import.meta.env.VITE_BACKEND_URL}/color-camisetas`;
-            const respuesta = await axios.post(url, form);
-            const { fecha, camiseta } = respuesta.data;
-            localStorage.setItem("fecha", form.fecha);
-            if (camiseta === "roja") {
+        // Obtener fecha actual en Ecuador (zona horaria UTC-5) en formato YYYY-MM-DD
+        const fechaActualEcuador = new Date().toLocaleString('en-CA', { 
+            timeZone: 'America/Guayaquil', 
+            year: 'numeric', 
+            month: '2-digit', 
+            day: '2-digit' 
+        }).split(',')[0];
+
+        if (fecha < fechaActualEcuador) {
+            return 'La fecha no puede ser anterior a la actual.';
+        }
+
+        const [year, month, day] = fecha.split('-').map(Number);
+        const fechaLocal = new Date(year, month - 1, day);
+        return fechaLocal.toLocaleDateString('es-ES', {
+            weekday: 'long',
+            day: '2-digit',
+            month: 'long',
+            year: 'numeric',
+        });
+    };
+
+    const obtenerCamiseta = (fecha) => {
+        const fechaSeleccionada = new Date(fecha);
+        const fechaBase = new Date('2025-03-31');
+        const colores = ['roja', 'gris', 'azul'];
+        const diasTranscurridos = Math.floor(
+            (fechaSeleccionada.getTime() - fechaBase.getTime()) / (1000 * 60 * 60 * 24)
+        );
+        const indice = (diasTranscurridos % colores.length + colores.length) % colores.length;
+        return colores[indice];
+    };
+
+    const navegarAColor = (color) => {
+        const fechaSeleccionada = form.fecha;
+        if (!fechaSeleccionada) {
+            setMensaje('La fecha es obligatoria.');
+            setIsError(true);
+            return;
+        }
+        
+        localStorage.setItem("fecha", fechaSeleccionada);
+        
+        switch (color) {
+            case 'roja':
                 navigate("/roja");
-            } else if (camiseta === "gris") {
+                break;
+            case 'gris':
                 navigate("/gris");
-            }
-            else if (camiseta === "azul") {
+                break;
+            case 'azul':
                 navigate("/azul");
-            }
-        } catch (error) {
-            console.error(error);
-            const mensaje = document.getElementById("mensaje");
-            mensaje.innerHTML = error?.response.data.error;
-            mensaje.classList.remove("text-green-500");
-            mensaje.classList.add("text-red-500");
+                break;
+            default:
+                setMensaje('Camiseta no reconocida.');
+                setIsError(true);
         }
     };
 
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        
+        if (!form.fecha) {
+            setMensaje('La fecha es obligatoria.');
+            setIsError(true);
+            return;
+        }
+
+        if (isError) {
+            return;
+        }
+
+        const camiseta = obtenerCamiseta(form.fecha);
+        const coloresValidos = ['roja', 'gris', 'azul'];
+        
+        if (coloresValidos.includes(camiseta)) {
+            navegarAColor(camiseta);
+        } else {
+            setMensaje('Camiseta no reconocida.');
+            setIsError(true);
+        }
+    };
+
+    // Obtener fecha mínima y máxima
+    const fechaMinima = new Date().toLocaleString('en-CA', { 
+        timeZone: 'America/Guayaquil', 
+        year: 'numeric', 
+        month: '2-digit', 
+        day: '2-digit' 
+    }).split(',')[0];
+    
+    const fechaMaxima = (() => {
+        const max = new Date();
+        max.setMonth(max.getMonth() + 1);
+        return max.toISOString().split('T')[0];
+    })();
+
     return (
-        <div className="w-full min-h-screen bg-red-700 flex flex-col justify-center items-center" >
-                <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-lg">
-                <small className="text-black-700 text-center block my-4 text-3xl font-extrabold">Color de Camiseta</small>
-                <div className="flex justify-center items-center gap-4 mb-4">
-                    <img src={KFC} alt="Logo" className="w-1/3 rounded-lg shadow-md" />
-                    <img src={ARP} alt="Logo" className="w-1/3 rounded-lg shadow-md" />
-                    <img src={Tropi} alt="Logo" className="w-1/3 rounded-lg shadow-md" />
-                </div>
-                <form onSubmit={handleSubmit}>
-                    <div className="mb-3">
-                    <label className="mb-2 block text-sm font-semibold">Seleccione una fecha a averiguar:</label>
-                    <input
-                        type="date"
-                        className="block w-full rounded-md border border-gray-300 focus:border-blue-700 focus:outline-none focus:ring-1 focus:ring-blue-700 py-1 px-2 text-gray-500"
-                        min={new Date().toISOString().split("T")[0]} 
-                        name="fecha"
-                        value={form.fecha}
-                        onChange={handleChange}
-                        placeholder="Fecha"
-                    />
+        <div className={`w-full min-h-screen flex flex-col justify-center items-center p-4 transition-colors duration-300 ${
+            isDark ? 'bg-red-900' : 'bg-red-700'
+        }`}>
+            <div className={`p-6 md:p-8 rounded-lg shadow-lg w-full max-w-lg md:max-w-2xl lg:max-w-4xl transition-colors duration-300 ${
+                isDark ? 'bg-gray-800 shadow-gray-900/50' : 'bg-white shadow-black/20'
+            }`}>
+                <h1 className={`text-center block my-4 text-2xl md:text-3xl lg:text-4xl font-extrabold transition-colors duration-300 ${
+                    isDark ? 'text-white' : 'text-black'
+                }`}>
+                    Color de Camiseta
+                </h1>
+                
+                {/* Contenedor responsivo */}
+                <div className="flex flex-col lg:flex-row lg:items-center lg:justify-center lg:gap-8">
+                    {/* Imágenes */}
+                    <div className="flex justify-center items-center gap-2 md:gap-4 mb-4 lg:mb-0 lg:flex-col lg:gap-6">
+                        <img 
+                            src={KFC} 
+                            alt="Logo KFC" 
+                            className="w-16 h-16 md:w-20 md:h-20 lg:w-24 lg:h-24 xl:w-32 xl:h-32 rounded-lg shadow-md object-contain" 
+                        />
+                        <img 
+                            src={ARP} 
+                            alt="Logo ARP" 
+                            className="w-16 h-16 md:w-20 md:h-20 lg:w-24 lg:h-24 xl:w-32 xl:h-32 rounded-lg shadow-md object-contain" 
+                        />
+                        <div className={`rounded-lg shadow-md p-1 transition-colors duration-300 ${
+                            isDark ? 'bg-white' : 'bg-white'
+                        }`}>
+                            <img 
+                                src={Tropi} 
+                                alt="Logo Tropi" 
+                                className="w-16 h-16 md:w-20 md:h-20 lg:w-24 lg:h-24 xl:w-32 xl:h-32 rounded-lg object-contain" 
+                            />
+                        </div>
                     </div>
-                    <small id="mensaje" className="text-center justify-center text-green-500 text-sm mb-2 block">
-                        {fechaFormateada(form.fecha)}
-                    </small>                    
-                    <small className="text-gray-500 text-sm mb-4">*Recuerda que la fecha es obligatoria y no puede ser anterior a la actual.</small><br/><br/>
-                    <button type="submit" className="py-2 w-full block text-center bg-blue-700/100 text-white border rounded-xl hover:scale-100 duration-300 hover:bg-blue-900 hover:text-white">Visualizar el Color de Camiseta</button>
-                </form>
+
+                    {/* Formulario */}
+                    <div className="flex-1 lg:max-w-md">
+                        <form onSubmit={handleSubmit} className="space-y-4">
+                            <div className="mb-3">
+                                <label className={`mb-2 block text-sm md:text-base lg:text-lg font-semibold transition-colors duration-300 ${
+                                    isDark ? 'text-white' : 'text-black'
+                                }`}>
+                                    Selecciona una fecha:
+                                </label>
+                                <input
+                                    type="date"
+                                    className={`block w-full rounded-md border focus:outline-none focus:ring-1 py-2 px-3 text-sm md:text-base cursor-pointer transition-all duration-300 ${
+                                        isDark 
+                                            ? 'bg-gray-700 text-white border-gray-600 focus:border-blue-400 focus:ring-blue-400 placeholder-gray-400' 
+                                            : 'bg-gray-50 text-gray-700 border-gray-300 focus:border-blue-700 focus:ring-blue-700'
+                                    }`}
+                                    min={fechaMinima}
+                                    max={fechaMaxima}
+                                    name="fecha"
+                                    value={form.fecha}
+                                    onChange={handleChange}
+                                    placeholder="Selecciona una fecha"
+                                    onKeyDown={(e) => e.preventDefault()}
+                                    onInput={(e) => e.preventDefault()}
+                                    onPaste={(e) => e.preventDefault()}
+                                    onClick={(e) => {
+                                        try {
+                                            e.target.showPicker();
+                                        } catch (error) {
+                                            // Fallback para navegadores que no soportan showPicker
+                                            e.target.focus();
+                                        }
+                                    }}
+                                    onFocus={(e) => {
+                                        try {
+                                            e.target.showPicker();
+                                        } catch (error) {
+                                            // Fallback silencioso
+                                        }
+                                    }}
+                                />
+                            </div>
+                            
+                            <div className="text-center">
+                                <small 
+                                    className={`text-sm md:text-base mb-2 block font-medium transition-colors duration-300 ${
+                                        isError 
+                                            ? (isDark ? 'text-red-400' : 'text-red-500')
+                                            : (isDark ? 'text-green-400' : 'text-green-500')
+                                    }`}
+                                >
+                                    {mensaje}
+                                </small>
+                            </div>
+                            
+                            <small className={`text-xs md:text-sm mb-4 block text-center transition-colors duration-300 ${
+                                isDark ? 'text-gray-400' : 'text-gray-500'
+                            }`}>
+                                *Recuerda que la fecha es obligatoria y no puede ser anterior a la actual.
+                            </small>
+                            
+                            <div className="pt-4">
+                                <button 
+                                    type="submit" 
+                                    disabled={isError || !form.fecha}
+                                    className={`py-2 md:py-3 w-full block text-center text-white border rounded-xl transition-all duration-300 text-sm md:text-base font-medium ${
+                                        isError || !form.fecha 
+                                            ? (isDark ? 'bg-gray-600 cursor-not-allowed border-gray-600' : 'bg-gray-400 cursor-not-allowed border-gray-400')
+                                            : (isDark 
+                                                ? 'bg-blue-600 hover:bg-blue-700 hover:scale-105 shadow-lg hover:shadow-blue-500/25 border-blue-600' 
+                                                : 'bg-blue-700 hover:bg-blue-900 hover:scale-105 shadow-lg hover:shadow-xl border-blue-700'
+                                            )
+                                    }`}
+                                >
+                                    Ver el color de camiseta
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
             </div>
         </div>
     );
