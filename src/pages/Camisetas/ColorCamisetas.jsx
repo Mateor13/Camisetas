@@ -24,8 +24,25 @@ const ColorCamisetas = () => {
 
         mediaQuery.addEventListener('change', handleChange);
 
+        // Bloquear scroll en body y html
+        document.body.style.overflow = 'hidden';
+        document.documentElement.style.overflow = 'hidden';
+        document.body.style.height = '100vh';
+        document.documentElement.style.height = '100vh';
+        document.body.style.position = 'fixed';
+        document.body.style.width = '100%';
+
         // Cleanup
-        return () => mediaQuery.removeEventListener('change', handleChange);
+        return () => {
+            mediaQuery.removeEventListener('change', handleChange);
+            // Restaurar scroll al desmontar el componente
+            document.body.style.overflow = '';
+            document.documentElement.style.overflow = '';
+            document.body.style.height = '';
+            document.documentElement.style.height = '';
+            document.body.style.position = '';
+            document.body.style.width = '';
+        };
     }, []);
 
     const handleChange = (e) => {
@@ -143,13 +160,24 @@ const ColorCamisetas = () => {
     })();
 
     return (
-        <div className={`w-full min-h-screen flex flex-col justify-center items-center p-4 transition-colors duration-300 ${
-            isDark ? 'bg-red-900' : 'bg-red-700'
-        }`}>
-            <div className={`p-6 md:p-8 rounded-lg shadow-lg w-full max-w-lg md:max-w-2xl lg:max-w-4xl transition-colors duration-300 ${
+        <div 
+            className={`w-full h-screen flex flex-col justify-center items-center p-2 sm:p-4 transition-colors duration-300 overflow-hidden ${
+                isDark ? 'bg-red-900' : 'bg-red-700'
+            }`}
+            style={{
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                touchAction: 'none',
+                overscrollBehavior: 'none'
+            }}
+        >
+            <div className={`p-4 sm:p-6 md:p-8 lg:p-10 rounded-lg shadow-lg w-full max-w-sm sm:max-w-md md:max-w-2xl lg:max-w-4xl xl:max-w-5xl transition-colors duration-300 ${
                 isDark ? 'bg-gray-800 shadow-gray-900/50' : 'bg-white shadow-black/20'
             }`}>
-                <h1 className={`text-center block my-4 text-2xl md:text-3xl lg:text-4xl font-extrabold transition-colors duration-300 ${
+                <h1 className={`text-center block my-2 sm:my-3 md:my-4 text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-extrabold transition-colors duration-300 ${
                     isDark ? 'text-white' : 'text-black'
                 }`}>
                     Color de Camiseta
@@ -158,16 +186,16 @@ const ColorCamisetas = () => {
                 {/* Contenedor responsivo */}
                 <div className="flex flex-col lg:flex-row lg:items-center lg:justify-center lg:gap-8">
                     {/* Imágenes */}
-                    <div className="flex justify-center items-center gap-2 md:gap-4 mb-4 lg:mb-0 lg:flex-col lg:gap-6">
+                    <div className="flex justify-center items-center gap-2 sm:gap-3 md:gap-4 mb-4 sm:mb-5 lg:mb-0 lg:flex-col lg:gap-6">
                         <img 
                             src={KFC} 
                             alt="Logo KFC" 
-                            className="w-16 h-16 md:w-20 md:h-20 lg:w-24 lg:h-24 xl:w-32 xl:h-32 rounded-lg shadow-md object-contain" 
+                            className="w-14 h-14 sm:w-16 sm:h-16 md:w-20 md:h-20 lg:w-24 lg:h-24 xl:w-28 xl:h-28 rounded-lg shadow-md object-contain" 
                         />
                         <img 
                             src={ARP} 
                             alt="Logo ARP" 
-                            className="w-16 h-16 md:w-20 md:h-20 lg:w-24 lg:h-24 xl:w-32 xl:h-32 rounded-lg shadow-md object-contain" 
+                            className="w-14 h-14 sm:w-16 sm:h-16 md:w-20 md:h-20 lg:w-24 lg:h-24 xl:w-28 xl:h-28 rounded-lg shadow-md object-contain" 
                         />
                         <div className={`rounded-lg shadow-md p-1 transition-colors duration-300 ${
                             isDark ? 'bg-white' : 'bg-white'
@@ -175,23 +203,23 @@ const ColorCamisetas = () => {
                             <img 
                                 src={Tropi} 
                                 alt="Logo Tropi" 
-                                className="w-16 h-16 md:w-20 md:h-20 lg:w-24 lg:h-24 xl:w-32 xl:h-32 rounded-lg object-contain" 
+                                className="w-14 h-14 sm:w-16 sm:h-16 md:w-20 md:h-20 lg:w-24 lg:h-24 xl:w-28 xl:h-28 rounded-lg object-contain" 
                             />
                         </div>
                     </div>
 
                     {/* Formulario */}
-                    <div className="flex-1 lg:max-w-md">
-                        <form onSubmit={handleSubmit} className="space-y-4">
+                    <div className="flex-1 lg:max-w-md xl:max-w-lg">
+                        <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
                             <div className="mb-3">
-                                <label className={`mb-2 block text-sm md:text-base lg:text-lg font-semibold transition-colors duration-300 ${
+                                <label className={`mb-2 block text-sm sm:text-base md:text-lg lg:text-xl font-semibold transition-colors duration-300 ${
                                     isDark ? 'text-white' : 'text-black'
                                 }`}>
                                     Selecciona una fecha:
                                 </label>
                                 <input
                                     type="date"
-                                    className={`block w-full rounded-md border focus:outline-none focus:ring-1 py-2 px-3 text-sm md:text-base cursor-pointer transition-all duration-300 ${
+                                    className={`block w-full rounded-md border focus:outline-none focus:ring-1 py-2 sm:py-2.5 md:py-3 px-3 md:px-4 text-sm sm:text-base md:text-lg cursor-pointer transition-all duration-300 ${
                                         isDark 
                                             ? 'bg-gray-700 text-white border-gray-600 focus:border-blue-400 focus:ring-blue-400 placeholder-gray-400' 
                                             : 'bg-gray-50 text-gray-700 border-gray-300 focus:border-blue-700 focus:ring-blue-700'
@@ -225,7 +253,7 @@ const ColorCamisetas = () => {
                             
                             <div className="text-center">
                                 <small 
-                                    className={`text-sm md:text-base mb-2 block font-medium transition-colors duration-300 ${
+                                    className={`text-sm sm:text-base md:text-lg mb-2 block font-medium transition-colors duration-300 ${
                                         isError 
                                             ? (isDark ? 'text-red-400' : 'text-red-500')
                                             : (isDark ? 'text-green-400' : 'text-green-500')
@@ -235,17 +263,17 @@ const ColorCamisetas = () => {
                                 </small>
                             </div>
                             
-                            <small className={`text-xs md:text-sm mb-4 block text-center transition-colors duration-300 ${
+                            <small className={`text-xs sm:text-sm md:text-base mb-4 block text-center transition-colors duration-300 ${
                                 isDark ? 'text-gray-400' : 'text-gray-500'
                             }`}>
                                 *Recuerda que la fecha es obligatoria y no puede ser anterior a la actual.
                             </small>
                             
-                            <div className="pt-4">
+                            <div className="pt-2 sm:pt-3">
                                 <button 
                                     type="submit" 
                                     disabled={isError || !form.fecha}
-                                    className={`py-2 md:py-3 w-full block text-center text-white border rounded-xl transition-all duration-300 text-sm md:text-base font-medium ${
+                                    className={`py-3 sm:py-3.5 md:py-4 w-full block text-center text-white border rounded-xl transition-all duration-300 text-sm sm:text-base md:text-lg font-medium ${
                                         isError || !form.fecha 
                                             ? (isDark ? 'bg-gray-600 cursor-not-allowed border-gray-600' : 'bg-gray-400 cursor-not-allowed border-gray-400')
                                             : (isDark 
