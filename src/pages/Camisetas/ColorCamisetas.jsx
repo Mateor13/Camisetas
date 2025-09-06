@@ -177,17 +177,12 @@ const ColorCamisetas = () => {
 
     return (
         <div
-            className={`w-full h-screen flex flex-col justify-center items-center p-2 sm:p-4 transition-colors duration-300 overflow-hidden ${
+            className={`w-full h-screen flex flex-col justify-center items-center p-2 sm:p-4 transition-colors duration-300 overflow-auto ${
                 isDark ? 'bg-red-900' : 'bg-red-700'
             }`}
             style={{
-                position: 'fixed',
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: 0,
-                touchAction: 'none',
-                overscrollBehavior: 'none'
+                position: 'relative',
+                minHeight: '100vh',
             }}
         >
             <div className={`p-4 sm:p-6 md:p-8 lg:p-10 rounded-lg shadow-lg w-full max-w-sm sm:max-w-md md:max-w-2xl lg:max-w-4xl xl:max-w-5xl transition-colors duration-300 ${
@@ -234,7 +229,7 @@ const ColorCamisetas = () => {
                         aria-expanded={showHoy}
                         aria-controls="hoy-section"
                     >
-                        Camiseta hoy
+                        La camiseta de hoy
                         <span className="ml-2">{showHoy ? '▲' : '▼'}</span>
                     </button>
                     {showHoy && (
